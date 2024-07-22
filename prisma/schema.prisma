@@ -1,0 +1,257 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+// schema.prisma
+// schema.prisma
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL") // Asegúrate de definir DATABASE_URL en tu archivo .env
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Actividades {
+  id_actividad Int       @id @default(autoincrement())
+  descripcion  String?   @db.VarChar(200)
+  fecha        DateTime? @db.Date
+  evidencia    String?   @db.VarChar(100)
+  instructor   String?   @db.VarChar(50)
+  productiva   Int?      @db.Int
+
+  @@index([productiva])
+}
+
+model Ambientes {
+  id_ambiente Int        @id @default(autoincrement())
+  nombre_amb  String?    @db.VarChar(80)
+  municipio   Int?       @db.Int
+  sede        Sede?
+  estado      Estado?
+
+  @@index([municipio])
+}
+
+model Areas {
+  id_area     Int      @id @default(autoincrement())
+  nombre_area String?  @db.VarChar(80)
+}
+
+model Asignaciones {
+  id_asignacion Int      @id @default(autoincrement())
+  fecha_inicio  DateTime? @db.Date
+  fecha_fin     DateTime? @db.Date
+  productiva    Int?     @db.Int
+  instructor    Int?     @db.Int
+  estado        Estado?
+
+  @@index([productiva])
+  @@index([instructor])
+}
+
+model Empresa {
+  id_empresa   Int      @id @default(autoincrement())
+  razon_social String?  @db.VarChar(80)
+  direccion    String?  @db.VarChar(80)
+  telefono     String?  @db.VarChar(20)
+  correo       String?  @db.VarChar(80)
+  municipio    Int?     @db.Int
+  estado       Estado?
+
+  @@index([municipio])
+}
+
+model Fichas {
+  codigo          Int      @id
+  inicio_ficha    DateTime? @db.Date
+  fin_lectiva     DateTime? @db.Date
+  fin_ficha       DateTime? @db.Date
+  programa        Int?     @db.Int
+  sede            Sede?
+  estado          Estado?
+
+  @@index([programa])
+}
+
+model Horarios {
+  id_horario     Int      @id @default(autoincrement())
+  fecha_inicio   DateTime? @db.Date
+  hora_inicio    DateTime? @db.Time
+  fecha_fin      DateTime? @db.Date
+  hora_fin       DateTime? @db.Time
+  dia            Dia?
+  cantidad_horas Int?     @db.Int
+  instructor     Int?     @db.Int
+  ficha          Int?     @db.Int
+  ambiente       Int?     @db.Int
+  estado         Estado?
+
+  @@index([ambiente])
+  @@index([ficha])
+  @@index([instructor])
+}
+
+model Matriculas {
+  id_matricula   Int      @id @default(autoincrement())
+  ficha          Int?     @db.Int
+  aprendiz       Int?     @db.Int
+  estado         Estado?
+  pendiente_tecnicos Int? @db.Int
+  pendiente_transversales Int? @db.Int
+  pendiente_ingles Int?   @db.Int
+
+  @@unique([ficha, aprendiz])
+  @@index([aprendiz])
+}
+
+model Municipios {
+  id_municipio  Int      @id @default(autoincrement())
+  nombre_mpio   String?  @db.VarChar(80)
+  departamento  String?  @db.VarChar(80)
+}
+
+model Personas {
+  id_persona     Int      @id @default(autoincrement())
+  identificacion Int?     @db.Int
+  nombres        String?  @db.VarChar(80)
+  correo         String?  @db.VarChar(80)
+  telefono       String?  @db.VarChar(40)
+  password       String?  @db.VarChar(25)
+  rol            Rol?
+  cargo          Cargo?
+  municipio      Int?     @db.Int
+
+  @@unique([identificacion])
+  @@index([municipio])
+}
+
+model Productiva {
+  id_productiva Int      @id @default(autoincrement())
+  matricula     Int?     @db.Int
+  empresa       Int?     @db.Int
+  fecha_inicio  DateTime? @db.Date
+  fecha_fin     DateTime? @db.Date
+  alternativa   Alternativa?
+  estado        Estado?
+  acuerdo       String?  @db.VarChar(100)
+  arl           String?  @db.VarChar(100)
+  consulta      String?  @db.VarChar(100)
+
+  @@index([matricula])
+  @@index([empresa])
+}
+
+model Programas {
+  id_programa    Int      @id @default(autoincrement())
+  nombre_programa String? @db.VarChar(80)
+  sigla           String? @db.VarChar(20)
+  nivel           Nivel?
+  estado          Estado?
+}
+
+model Seguimientos {
+  id_seguimiento Int      @id @default(autoincrement())
+  fecha          DateTime? @db.Date
+  seguimiento    SeguimientoEnum?
+  productiva     Int?     @db.Int
+  estado         Estado?
+  archivo        String?  @db.VarChar(100)
+  instructor     String?  @db.VarChar(50)
+
+  @@index([productiva])
+}
+
+model Vinculacion {
+  id_vinculacion Int      @id @default(autoincrement())
+  instructor     Int?     @db.Int
+  tipo           Tipo?
+  sede           Sede?
+  area           Int?     @db.Int
+
+  @@index([instructor])
+  @@index([area])
+}
+
+// Enum definitions
+
+enum BitacorasEnum {
+  Bitacoras_1
+  Bitacoras_2
+  Bitacoras_3
+  Bitacoras_4
+  Bitacoras_5
+  Bitacoras_6
+  Bitacoras_7
+  Bitacoras_8
+  Bitacoras_9
+  Bitacoras_10
+  Bitacoras_11
+  Bitacoras_12
+}
+
+enum Sede {
+  centro
+  yamboro
+}
+
+enum SeguimientoEnum {
+  seguimiento_1
+  seguimiento_2
+  seguimiento_3
+}
+
+enum Estado {
+  solicitud
+  aprobado
+  no_aprobado
+  activo
+  inactivo
+  lectiva
+  electiva
+  finalizado
+}
+
+enum Dia {
+  lunes
+  martes
+  miercoles
+  jueves
+  viernes
+  sabado
+  domingo
+}
+
+enum Alternativa {
+  Contrato_de_Aprendizaje
+  Proyecto_Productivo
+  Pasantias
+  Monitoria
+}
+
+enum Nivel {
+  Tecnico
+  Tecnologo
+}
+
+enum Rol {
+  Administrador
+  Instructor
+  Coordinador
+  Lider
+  Seguimiento
+}
+
+enum Cargo {
+  Instructor
+  Aprendiz
+  Coordinador
+  Administrativo
+}
+
+enum Tipo {
+  contratista
+  planta
+}
